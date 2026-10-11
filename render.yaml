@@ -1,0 +1,41 @@
+# Render Blueprint: New → Blueprint → выберите репозиторий.
+# Один web-сервис (API + webhook бота + планировщик + Mini App) и PostgreSQL.
+# Для работы 24/7 нужен платный план (Starter): бесплатный web-сервис засыпает без трафика.
+services:
+  - type: web
+    name: major-shop
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: major-shop-db
+          property: connectionString
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_TELEGRAM_ID
+        sync: false
+      - key: MANAGER_USERNAME
+        sync: false
+      # MINI_APP_URL можно не задавать: по умолчанию используется адрес сервиса (RENDER_EXTERNAL_URL).
+      - key: MINI_APP_URL
+        sync: false
+      - key: BOT_MODE
+        value: webhook
+      - key: WEBHOOK_SECRET
+        generateValue: true
+      - key: ROLE
+        value: all
+      - key: NODE_ENV
+        value: production
+
+databases:
+  - name: major-shop-db
+    plan: basic-256mb
+    region: frankfurt
+    databaseName: major_shop
+    user: major

@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+coverage/
+backups/
+.DS_Store
+
+# Vercel
+.vercel/
+apps/server/dist-vercel/

@@ -1,0 +1,52 @@
+# Локальный запуск всего магазина: docker compose up -d --build
+# Переменные берутся из .env (скопируйте .env.example).
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: major
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-major}
+      POSTGRES_DB: major_shop
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U major -d major_shop']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # Порт наружу — только для локальной разработки и бэкапов с хоста.
+    ports:
+      - '127.0.0.1:5432:5432'
+
+  # Backend + бот + планировщик + Mini App (статикой) — один контейнер.
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://major:${POSTGRES_PASSWORD:-major}@postgres:5432/major_shop
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${PORT:-3000}:3000'
+
+  # Фронтенд в режиме разработки с горячей перезагрузкой (необязательно):
+  # docker compose --profile dev up web
+  web:
+    profiles: ['dev']
+    image: node:22-bookworm-slim
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev -w @major/web -- --host 0.0.0.0"
+    volumes:
+      - .:/app
+    environment:
+      VITE_PROXY_TARGET: http://app:3000
+    ports:
+      - '5173:5173'
+    depends_on:
+      - app
+
+volumes:
+  pgdata:

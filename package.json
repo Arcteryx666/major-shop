@@ -1,0 +1,40 @@
+{
+  "name": "major-shop",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @major/server & npm run dev -w @major/web",
+    "dev:server": "npm run dev -w @major/server",
+    "dev:web": "npm run dev -w @major/web",
+    "build": "npm run build -w @major/web && npm run build -w @major/server",
+    "start": "npm run start -w @major/server",
+    "db:generate": "npm run db:generate -w @major/server",
+    "db:migrate": "npm run db:migrate -w @major/server",
+    "db:migrate:dev": "npm run db:migrate:dev -w @major/server",
+    "db:seed": "npm run db:seed -w @major/server",
+    "typecheck": "npm run db:generate && npm run typecheck -w @major/server && npm run typecheck -w @major/web",
+    "test": "npm run db:generate && npm run test -w @major/server",
+    "start:migrate": "npm run start:migrate -w @major/server",
+    "backup": "bash scripts/backup.sh",
+    "restore": "bash scripts/restore.sh",
+    "build:vercel": "node scripts/build-vercel.mjs"
+  },
+  "devDependencies": {
+    "@vercel/nft": "^0.29.4",
+    "esbuild": "^0.28.2"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2",
+    "esbuild": "^0.28.2",
+    "tsup": {
+      "esbuild": "^0.28.2"
+    }
+  }
+}
